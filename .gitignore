@@ -1,4 +1,4 @@
 venv
 .env
-__pychache__
+__pycache__
 chromadb_data
