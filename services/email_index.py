@@ -1,44 +1,7 @@
+from typing import List
 from llama_index.core.node_parser import SentenceSplitter
-from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
 
-@dataclass
-class EmailData:
-    id: str
-    date: str
-    body: str
-    subject: str
-    from_address: str
-    to_addresses: str
-    message_id: str
-    in_reply_to: str
-    references: str
-    attachments: List[Dict[str, Any]]
-    
-@dataclass
-class ChunkMetadata:
-    source: str
-    document_type: str
-    date: str
-    
-    subject: Optional[str]
-    sender: Optional[str]
-    to: Optional[str]
-    message_id: Optional[str]
-    in_reply_to: Optional[str]
-    references: Optional[str]
-
-    file_path: Optional[str]
-    title: Optional[str]
-
-    chunk_index: int
-    total_chunks: int
-    extra: Optional[Dict] = None
-
-@dataclass
-class Chunk:
-    text: str
-    metadata: ChunkMetadata
+from .models import Chunk, ChunkMetadata, EmailData 
 
 class EmailIndexer:
     def __init__(self, chunk_size=2000, chunk_overlap=50):

@@ -2,7 +2,7 @@ from typing import List
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.readers.base import SimpleDirectoryReader
 from datetime import datetime
-from .email_index import Chunk, ChunkMetadata, EmailData 
+from .models import Chunk, ChunkMetadata
 
 class DocumentIndexer:
     def __init__(self, chunk_size=1024, chunk_overlap=50):

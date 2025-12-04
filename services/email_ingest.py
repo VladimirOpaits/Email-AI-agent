@@ -7,6 +7,8 @@ from typing import Optional, List, Dict, Any
 
 from flanker.mime import message
 
+from models import EmailData
+
 class EmailClientFlanker:
     def __init__(self, host, username, password, mailbox="INBOX", port=993, ssl=True):
         self.host = host
@@ -125,21 +127,23 @@ class EmailClientFlanker:
         collect_attachments_recursive(parsed_mime)
         return attachments
 
-    def _process_email_data(self, uid: bytes, parsed_mime: mime.message, date: datetime, attachments: List, body: str) -> Dict[str, Any]:
-        return {
-            "id": uid.decode(),
-            "subject": parsed_mime.subject or "",
-            "from": self._get_header(parsed_mime, "From"),
-            "to": self._get_header(parsed_mime, "To"),
-            "date": date.isoformat(),
-            "body": body,
-            "attachments": attachments,
-            "message_id": self._get_header(parsed_mime, "Message-ID"),
-            "in_reply_to": self._get_header(parsed_mime, "In-Reply-To"),
-            "references": self._get_header(parsed_mime, "References"),
-        }
+    def _process_email_data(self, uid: bytes, parsed_mime: message.Message, date: datetime, attachments: List, body: str) -> EmailData:
+            data_dict = {
+                "id": uid.decode(),
+                "subject": parsed_mime.subject or "",
+                "from": self._get_header(parsed_mime, "From"), 
+                "to": self._get_header(parsed_mime, "To"),
+                "date": date.isoformat(),
+                "body": body,
+                "attachments": attachments,
+                "message_id": self._get_header(parsed_mime, "Message-ID"),
+                "in_reply_to": self._get_header(parsed_mime, "In-Reply-To"),
+                "references": self._get_header(parsed_mime, "References"),
+            }
+            
+            return EmailData.model_validate(data_dict)
 
-    def fetch_new(self, since_date_imap_format: Optional[str] = None, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+    def fetch_new(self, since_date_imap_format: Optional[str] = None, limit: Optional[int] = None) -> List[EmailData]:
         self.connect()
         
         search_criteria = ["ALL"]
