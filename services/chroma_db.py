@@ -4,7 +4,7 @@ import logging
 import asyncio
 import shutil
 import os
-from typing import List
+from typing import List, Optional, Dict
 
 from llama_index.core import VectorStoreIndex, StorageContext, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
@@ -17,9 +17,22 @@ from dataclasses import dataclass
 @dataclass
 class ChunkMetadata:
     source: str
+    document_type: str
     date: str
+    
+    subject: Optional[str]
+    sender: Optional[str]
+    to: Optional[str]
+    message_id: Optional[str]
+    in_reply_to: Optional[str]
+    references: Optional[str]
+
+    file_path: Optional[str]
+    title: Optional[str]
+
     chunk_index: int
     total_chunks: int
+    extra: Optional[Dict] = None
 
 @dataclass
 class Chunk:
@@ -51,7 +64,21 @@ class ChromaDBCLient:
         nodes = [
             TextNode(
                 text = c.text,
-                metadata = {"source": c.metadata.source, "date": c.metadata.date, "chunk_index": c.metadata.chunk_index, "total_chunks": c.metadata.total_chunks}
+                metadata = {
+                    "document_type": c.metadata.document_type,
+                    "source": c.metadata.source, 
+                    "date": c.metadata.date,
+                    "subject": c.metadata.subject,
+                    "sender": c.metadata.sender,
+                    "to": c.metadata.to,
+                    "message_id": c.metadata.message_id,
+                    "in_reply_to": c.metadata.in_reply_to,
+                    "references": c.metadata.references,
+                    "file_path": c.metadata.file_path,
+                    "title": c.metadata.title,
+                    "chunk_index": c.metadata.chunk_index, 
+                    "total_chunks": c.metadata.total_chunks
+                }
             )
             for c in chunks
         ]
@@ -62,7 +89,21 @@ class ChromaDBCLient:
         nodes = [
             TextNode(
                 text = c.text,
-                metadata = {"source": c.metadata.source, "chunk_index": c.metadata.chunk_index, "total_chunks": c.metadata.total_chunks}
+                metadata = {
+                    "document_type": c.metadata.document_type,
+                    "source": c.metadata.source, 
+                    "date": c.metadata.date, 
+                    "subject": c.metadata.subject,
+                    "sender": c.metadata.sender,
+                    "to": c.metadata.to,
+                    "message_id": c.metadata.message_id,
+                    "in_reply_to": c.metadata.in_reply_to,
+                    "references": c.metadata.references,
+                    "file_path": c.metadata.file_path,
+                    "title": c.metadata.title,
+                    "chunk_index": c.metadata.chunk_index, 
+                    "total_chunks": c.metadata.total_chunks
+                }
             )
             for c in chunks
         ]

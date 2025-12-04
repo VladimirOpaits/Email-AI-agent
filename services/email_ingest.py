@@ -133,7 +133,10 @@ class EmailClientFlanker:
             "to": self._get_header(parsed_mime, "To"),
             "date": date.isoformat(),
             "body": body,
-            "attachments": attachments
+            "attachments": attachments,
+            "message_id": self._get_header(parsed_mime, "Message-ID"),
+            "in_reply_to": self._get_header(parsed_mime, "In-Reply-To"),
+            "references": self._get_header(parsed_mime, "References"),
         }
 
     def fetch_new(self, since_date_imap_format: Optional[str] = None, limit: Optional[int] = None) -> List[Dict[str, Any]]:

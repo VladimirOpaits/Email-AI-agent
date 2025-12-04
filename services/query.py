@@ -11,7 +11,7 @@ from langchain_core.documents import Document
 def _format_docs(docs: List[Document]) -> str:
     return "\n\n".join(doc.page_content for doc in docs)
 
-class EmailQuery:
+class Query:
     def __init__(self, index: VectorStoreIndex, openai_api_key: str): 
         self.index = index
         self.llm = ChatOpenAI(temperature=0.1, model="gpt-4o", api_key=openai_api_key)
