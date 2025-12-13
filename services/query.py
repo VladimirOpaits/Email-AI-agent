@@ -1,6 +1,7 @@
-from typing import Dict, List
+from typing import Dict, List, Optional, Any, Union
 from llama_index.core import VectorStoreIndex
 from llama_index.core.schema import NodeWithScore
+from llama_index.core.vector_stores import ExactMatchFilter, MetadataFilters
 
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
@@ -11,7 +12,7 @@ from langchain_core.documents import Document
 def _format_docs(docs: List[Document]) -> str:
     return "\n\n".join(doc.page_content for doc in docs)
 
-class Query:
+class SmartRetrieverService:
     def __init__(self, index: VectorStoreIndex, openai_api_key: str): 
         self.index = index
         self.llm = ChatOpenAI(temperature=0.1, model="gpt-4o", api_key=openai_api_key)
@@ -28,19 +29,35 @@ class Query:
         """)
 
         self.qa_chain = (
-            {
-                "context": self.lc_retriever | _format_docs, 
-                "question": RunnablePassthrough(),
-            }
+            RunnablePassthrough.assign(
+                source_documents=self.lc_retriever, 
+                context=lambda x: _format_docs(x['source_documents']),
+                question=RunnablePassthrough(), 
+            )
             | RAG_PROMPT
             | self.llm
             | StrOutputParser()
+            | RunnablePassthrough.assign(
+                answer=RunnablePassthrough(),
+                source_documents=lambda x: x['source_documents']
+            )
         )
+
+    def _createmetadata_filters(self, filters_dict: Dict[str, Any]) -> Optional[MetadataFilters]:
+        filters: List[ExactMatchFilter] = []
+        
+        for key, value in filters_dict.items():
+             if value is not None and value != "":
+                 filters.append(ExactMatchFilter(key=key, value=value))
+
+        return MetadataFilters(filters=filters) if filters else None
         
     def _retrieve_and_convert(self, input_dict: dict) -> List[Document]:
             query_text = input_dict["question"] 
+
+            metadata_filters = self._createmetadata_filters(input_dict.get("filters", {}))
             
-            llama_retriever = self.index.as_retriever() 
+            llama_retriever = self.index.as_retriever(filters = metadata_filters) 
             
             nodes: List[NodeWithScore] = llama_retriever.retrieve(query_text)
 
@@ -52,12 +69,18 @@ class Query:
                 for n in nodes
             ]
 
-    def query_emails(self, query_text: str) -> Dict:
-            source_documents = self._retrieve_and_convert({"question": query_text})
+    def query_emails(self, query_text: str, sender: Optional[str] = None, subject: Optional[str] = None) -> Dict:
             
-            answer = self.qa_chain.invoke({"question": query_text})
-            
-            return {
-                "answer": answer,
-                "source_documents": source_documents,
+            filter_dict = {
+                "sender": sender,
+                "subject": subject,
             }
+
+            input_data = {
+                "question": query_text,
+                "filters": filter_dict,
+            }
+
+            result = self.qa_chain.invoke(input_data)
+            
+            return result

@@ -1,7 +1,7 @@
 from services.email_ingest import EmailClientFlanker
 from services.email_index import EmailIndexer
 from services.chroma_db import ChromaDBCLient
-from services.query import Query
+from services.query import SmartRetrieverService
 from config import OPENAI_API_KEY
 
 from datetime import datetime
@@ -16,7 +16,7 @@ email_db = ChromaDBCLient()
 
 email_db.clear_db()
 
-email_query = Query(email_db.index, OPENAI_API_KEY)
+email_query = SmartRetrieverService(email_db.index, OPENAI_API_KEY)
 
 new_emails = email_client.fetch_new(convert_iso_to_imap("2025-12-01T09:07:20+01:00"))
 
