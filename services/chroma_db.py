@@ -4,7 +4,8 @@ import logging
 import asyncio
 import shutil
 import os
-from typing import List, Optional, Dict, asdict
+from typing import List, Optional, Dict
+from dataclasses import asdict
 
 from llama_index.core import VectorStoreIndex, StorageContext, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
@@ -25,7 +26,7 @@ class ChromaDBCLient:
     def __init__(self, path: str = "./chromadb_data", collection_name: str = "emails", openai_model: str = "text-embedding-3-small", chunk_size: int = 512, chunk_overlap: int = 50, max_tokens: int = 512, temperature: float = 0.3, max_concurrent_requests: int = 10):
         logger.info(f"Chroma initialized with collection {collection_name}")
 
-        self.client = chromadb.PersistentClient(path = path)
+        self.client = chromadb.PersistentClient(path = path, settings=chromadb.Settings(anonymized_telemetry=False))
         self.collection_name = collection_name
         self.chroma_collection = self.client.get_or_create_collection(name=collection_name)
 

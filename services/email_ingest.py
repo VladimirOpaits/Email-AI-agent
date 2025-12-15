@@ -5,9 +5,8 @@ import re
 from html import unescape
 from typing import Optional, List, Dict, Any
 
-from flanker.mime import message
-
-from models import EmailData
+from services.models import EmailData
+from flanker.mime.message.part import MimePart as FlankerMessage 
 
 class EmailClientFlanker:
     def __init__(self, host, username, password, mailbox="INBOX", port=993, ssl=True):
@@ -107,7 +106,7 @@ class EmailClientFlanker:
         
         return parsed, date
 
-    def _collect_attachments(self, parsed_mime: mime.message) -> List[Dict[str, Any]]:
+    def _collect_attachments(self, parsed_mime: FlankerMessage) -> List[Dict[str, Any]]:
         attachments = []
         
         def collect_attachments_recursive(part):
@@ -127,7 +126,7 @@ class EmailClientFlanker:
         collect_attachments_recursive(parsed_mime)
         return attachments
 
-    def _process_email_data(self, uid: bytes, parsed_mime: message.Message, date: datetime, attachments: List, body: str) -> EmailData:
+    def _process_email_data(self, uid: bytes, parsed_mime: FlankerMessage, date: datetime, attachments: List, body: str) -> EmailData:
             data_dict = {
                 "id": uid.decode(),
                 "subject": parsed_mime.subject or "",
@@ -139,6 +138,7 @@ class EmailClientFlanker:
                 "message_id": self._get_header(parsed_mime, "Message-ID"),
                 "in_reply_to": self._get_header(parsed_mime, "In-Reply-To"),
                 "references": self._get_header(parsed_mime, "References"),
+                "request_type": None,
             }
             
             return EmailData.model_validate(data_dict)
