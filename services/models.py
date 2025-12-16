@@ -26,20 +26,27 @@ class EmailData(BaseModel):
     class Config:
         populate_by_name = True
 
-class EmailClassificationResult(BaseModel):
-    category: EmailCategory = Field(
-        description="Must be one of: InsuranceClaim, GeneralInquiry or Claim Dialogue."
-    )
-    explanation: str = Field(
-        description="A brief explanation of why this category was chosen (e.g., 'The email contains a new policy number and incident description')."
-    )
-
 class ClaimData(BaseModel):
     client_name: Optional[str] = Field(description="Full name of the client submitting the claim.")
     policy_id: Optional[str] = Field(description="The policy identification number mentioned in the email.")
     incident_date: Optional[str] = Field(description="The date of the incident (e.g., 'yesterday', '2025-12-10').")
     incident_description_summary: Optional[str] = Field(description="A brief, one-sentence summary of the incident.")
 
+class EmailClassificationResult(BaseModel):
+    category: EmailCategory = Field(
+        description="Must be one of: InsuranceClaim, GeneralInquiry or Claim Dialogue."
+    )
+    explanation: str = Field(
+        description="A brief explanation of why this category was chosen."
+    )
+    
+    extracted_data: Optional[ClaimData] = Field(
+        None, description="Claim data, extracted if = InsuranceClaim."
+    )
+
+class SimpleClassificationResult(BaseModel):
+    category: EmailCategory = Field(description="Must be one of: InsuranceClaim, GeneralInquiry or Claim Dialogue.")
+    explanation: str = Field(description="A brief explanation.")
 
 @dataclass
 class ChunkMetadata:
