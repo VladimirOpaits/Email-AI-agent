@@ -1,3 +1,4 @@
+from unittest import result
 from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import sessionmaker, Session
 from typing import Generator, List, Optional
@@ -27,6 +28,11 @@ class PostgresRepository:
     def get_all_claims(self, db: Session, skip: int = 0, limit: int = 100) -> List[Claim]:
         stmt = select(Claim).offset(skip).limit(limit)
         result = db.scalars(stmt).all()
+        return result
+    
+    def get_claim_by_email_id(self, db: Session, email_id: str) -> Optional[Claim]:
+        stmt = select(Claim).where(Claim.source_email_id == email_id)
+        result = db.scalars(stmt).first()
         return result
     
     def update_claim(self, db: Session, claim_id: int, **kwargs) -> Optional[Claim]:
