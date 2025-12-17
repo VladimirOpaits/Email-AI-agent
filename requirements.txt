@@ -1,0 +1,28 @@
+# Core Framework & Graph
+langchain-openai
+langgraph
+pydantic
+pydantic-settings
+
+# Database (PostgreSQL)
+sqlalchemy
+psycopg2-binary
+
+# Vector Database (ChromaDB)
+chromadb
+llama-index-core
+llama-index-readers-file
+llama-index-vector-stores-chroma
+llama-index-embeddings-openai
+
+# Task Queue & Async
+celery
+redis
+
+# Email Processing
+imap-tools
+flanker
+
+# Utilities
+python-dotenv
+httpx

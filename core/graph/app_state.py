@@ -1,6 +1,6 @@
 from typing import TypedDict, List, Optional
-from services.models import EmailData, EmailClassificationResult
-from db_management.db_models import Claim
+from core.services.models import EmailData, EmailClassificationResult
+from core.db_management.db_models import Claim
 
 class GraphState(TypedDict):
     email: EmailData

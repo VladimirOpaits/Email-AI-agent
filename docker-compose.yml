@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-my_claims_db}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+
+  email_listener:
+    build: .
+    command: python apps/email_classifier/listener.py
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    restart: always
+
+  email_worker:
+    build: .
+    command: celery -A apps.email_classifier.celery_app worker --loglevel=info
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+    restart: always
+
+volumes:
+  postgres_data:

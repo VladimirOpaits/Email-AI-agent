@@ -16,7 +16,7 @@ class EmailData(BaseModel):
     attachments: List[Dict[str, Any]]
     
     from_address: str = Field(alias="from")
-    to_addresses: str = Field(alias="to")
+    to_addresses: List[str]
     message_id: str
     in_reply_to: str
     references: str

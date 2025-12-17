@@ -1,9 +1,9 @@
 from .app_state import GraphState
-from services.email_classifier import EmailClassifierService
-from db_management.db_repo import PostgresRepository
-from services.models import EmailCategory
-from services.email_index import EmailIndexer
-from services.chroma_db import ChromaDBCLient
+from core.services.email_classifier import EmailClassifierService
+from core.db_management.db_repo import PostgresRepository
+from core.services.models import EmailCategory
+from core.services.email_index import EmailIndexer
+from core.services.chroma_db import ChromaDBCLient
 
 from datetime import datetime, timezone
 

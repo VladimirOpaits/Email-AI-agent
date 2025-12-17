@@ -1,8 +1,8 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-from services.models import SimpleClassificationResult
+from core.services.models import SimpleClassificationResult
 
-from services.models import EmailClassificationResult, EmailCategory, EmailData, ClaimData 
+from core.services.models import EmailClassificationResult, EmailCategory, EmailData, ClaimData 
 
 class EmailClassifierService:
     def __init__(self, openai_api_key: str):
