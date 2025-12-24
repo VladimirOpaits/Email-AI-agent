@@ -20,6 +20,8 @@ class EmailIndexer:
         chunks_to_add = []
         
         for i, c in enumerate(raw_chunks):
+            to_str = ", ".join(email_object.to_addresses) if isinstance(email_object.to_addresses, list) else email_object.to_addresses
+
             chunk_model = Chunk(text=c, metadata=ChunkMetadata(
                 source=email_object.id, 
                 document_type='email',
@@ -28,7 +30,7 @@ class EmailIndexer:
                 
                 subject=email_object.subject,
                 sender=email_object.from_address,
-                to=email_object.to_addresses,
+                to=to_str,
                 message_id=email_object.message_id,
                 in_reply_to=email_object.in_reply_to,
                 references=email_object.references,

@@ -1,28 +1,22 @@
-# Core Framework & Graph
-langchain-openai
-langgraph
-pydantic
-pydantic-settings
+langchain-openai==0.0.5
+langgraph==0.0.15
+pydantic==2.6.1
+pydantic-settings==2.1.0
 
-# Database (PostgreSQL)
-sqlalchemy
-psycopg2-binary
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
 
-# Vector Database (ChromaDB)
-chromadb
-llama-index-core
-llama-index-readers-file
-llama-index-vector-stores-chroma
-llama-index-embeddings-openai
+chromadb==0.4.24
+llama-index-core==0.10.12
+llama-index-readers-file==0.1.5
+llama-index-vector-stores-chroma==0.1.4
+llama-index-embeddings-openai==0.1.6
 
-# Task Queue & Async
-celery
-redis
+celery[redis]==5.4.0
+redis==5.0.1
 
-# Email Processing
-imap-tools
-flanker
+imap-tools==1.5.0
+flanker==0.9.11
 
-# Utilities
-python-dotenv
-httpx
+python-dotenv==1.0.1
+httpx==0.26.0

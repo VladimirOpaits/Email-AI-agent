@@ -1,14 +1,13 @@
-from unittest import result
-from sqlalchemy import create_engine, select, text
+from sqlalchemy import create_engine, select, update, delete
 from sqlalchemy.orm import sessionmaker, Session
 from typing import Generator, List, Optional
 from .base import Base 
-from .db_models import Claim 
+from .db_models import Claim, Client, Policy, PolicyCoverage
 
 class PostgresRepository:
     def __init__(self, dsn: str):
         self.engine = create_engine(dsn)
-        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine) #фабрика
+        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 
     def create_tables(self):
         Base.metadata.create_all(bind=self.engine) 
@@ -20,56 +19,74 @@ class PostgresRepository:
         finally:
             db.close()
 
+    # --- Client Methods ---
+
+    def create_client(self, db: Session, **kwargs) -> Client:
+        new_client = Client(**kwargs)
+        db.add(new_client)
+        db.commit()
+        db.refresh(new_client)
+        return new_client
+
+    def get_client_by_id(self, db: Session, client_id: int) -> Optional[Client]:
+        return db.get(Client, client_id)
+
+    def get_client_by_email(self, db: Session, email: str) -> Optional[Client]:
+        stmt = select(Client).where(Client.email == email)
+        return db.scalars(stmt).first()
+
+    # --- Policy Methods ---
+
+    def create_policy(self, db: Session, **kwargs) -> Policy:
+        new_policy = Policy(**kwargs)
+        db.add(new_policy)
+        db.commit()
+        db.refresh(new_policy)
+        return new_policy
+
+    def get_policy_by_number(self, db: Session, policy_number: str) -> Optional[Policy]:
+        stmt = select(Policy).where(Policy.policy_number == policy_number)
+        return db.scalars(stmt).first()
+
+    # --- Coverage Methods ---
+
+    def create_coverage(self, db: Session, **kwargs) -> PolicyCoverage:
+        new_coverage = PolicyCoverage(**kwargs)
+        db.add(new_coverage)
+        db.commit()
+        db.refresh(new_coverage)
+        return new_coverage
+
+    # --- Claim Methods ---
+
+    def create_claim(self, db: Session, **kwargs) -> Claim:
+        new_claim = Claim(**kwargs)
+        db.add(new_claim)
+        db.commit()
+        db.refresh(new_claim)
+        return new_claim
+
     def get_claim_by_id(self, db: Session, claim_id: int) -> Optional[Claim]:
-        stmt = select(Claim).where(Claim.id == claim_id)
-        result = db.scalars(stmt).first()
-        return result
+        return db.get(Claim, claim_id)
+
+    def get_claim_by_email_id(self, db: Session, email_id: str) -> Optional[Claim]:
+        stmt = select(Claim).where(Claim.source_email_id == email_id)
+        return db.scalars(stmt).first()
 
     def get_all_claims(self, db: Session, skip: int = 0, limit: int = 100) -> List[Claim]:
         stmt = select(Claim).offset(skip).limit(limit)
-        result = db.scalars(stmt).all()
-        return result
-    
-    def get_claim_by_email_id(self, db: Session, email_id: str) -> Optional[Claim]:
-        stmt = select(Claim).where(Claim.source_email_id == email_id)
-        result = db.scalars(stmt).first()
-        return result
-    
+        return list(db.scalars(stmt).all())
+
     def update_claim(self, db: Session, claim_id: int, **kwargs) -> Optional[Claim]:
         if not kwargs:
             return self.get_claim_by_id(db, claim_id)
         
-        set_clauses = [f"{key} = :{key}" for key in kwargs.keys()]
-        sql_set = ", ".join(set_clauses)
-
-        params = kwargs.copy()
-        params['claim_id'] = claim_id
-
-        sql_query = text(
-            f"UPDATE claims SET {sql_set} WHERE id = :claim_id"
-        ).bindparams(**params)
-
-        db.execute(sql_query)
+        stmt = update(Claim).where(Claim.id == claim_id).values(**kwargs)
+        db.execute(stmt)
         db.commit()
-
         return self.get_claim_by_id(db, claim_id)
-    
-    def create_claim(self, db: Session, **kwargs) -> Claim:
-        columns = ", ".join(kwargs.keys())
-        values_placeholders = ", ".join([f":{key}" for key in kwargs.keys()])
 
-        sql_query = text(
-            f"INSERT INTO claims ({columns}) VALUES ({values_placeholders}) RETURNING *"
-        ).bindparams(**kwargs)
-
-        result = db.scalars(sql_query).first()
-        db.commit()
-        return result
-    
     def delete_claim(self, db: Session, claim_id: int) -> None:
-        sql_query = text(
-            "DELETE FROM claims WHERE id = :claim_id"
-        ).bindparams(claim_id=claim_id)
-
-        db.execute(sql_query)
+        stmt = delete(Claim).where(Claim.id == claim_id)
+        db.execute(stmt)
         db.commit()

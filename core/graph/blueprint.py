@@ -5,7 +5,8 @@ from .graph_nodes import (
     create_claim_node, 
     handle_general_inquiry_node, 
     index_email_node, 
-    final_summary_node
+    final_summary_node,
+    identify_client_node
 )
 
 from config import OPENAI_API_KEY, DATABASE_URL
@@ -24,6 +25,7 @@ def create_app():
     workflow = StateGraph(GraphState)
 
     workflow.add_node("classify", lambda state: classify_node(state, email_classifier))
+    workflow.add_node("identify_client", lambda state: identify_client_node(state, db_repo))
     workflow.add_node("create_claim", lambda state: create_claim_node(state, db_repo))
     workflow.add_node("handle_general_inquiry", handle_general_inquiry_node)
     workflow.add_node("index_email", lambda state: index_email_node(state, email_indexer, email_db))
@@ -35,13 +37,14 @@ def create_app():
         "classify",
         lambda state: state["next_step"], 
         {
-            "create_claim": "create_claim",
+            "identify_client": "identify_client",
             "index_email": "index_email",
             "handle_general_inquiry": "handle_general_inquiry",
             "finish": "finish"
         }
     )
 
+    workflow.add_edge("identify_client", "create_claim")
     workflow.add_edge("create_claim", "index_email") 
     workflow.add_edge("handle_general_inquiry", "index_email")
     workflow.add_edge("index_email", "finish")
